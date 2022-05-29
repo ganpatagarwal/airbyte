@@ -29,6 +29,8 @@ from source_amazon_seller_partner.streams import (
     FlatFileOrdersReportsByLastUpdate,
     FulfilledShipmentsReports,
     GetXmlBrowseTreeData,
+    ListFinancialEventGroups,
+    ListFinancialEvents,
     MerchantListingsReports,
     Orders,
     SellerFeedbackReports,
@@ -190,6 +192,8 @@ class SourceAmazonSellerPartner(AbstractSource):
             BrandAnalyticsAlternatePurchaseReports(**stream_kwargs),
             BrandAnalyticsItemComparisonReports(**stream_kwargs),
             GetXmlBrowseTreeData(**stream_kwargs),
+            ListFinancialEventGroups(**stream_kwargs),
+            ListFinancialEvents(**stream_kwargs),
         ]
 
     def spec(self, *args, **kwargs) -> ConnectorSpecification:

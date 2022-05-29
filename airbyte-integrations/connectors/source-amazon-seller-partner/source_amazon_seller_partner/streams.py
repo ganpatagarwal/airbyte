@@ -30,6 +30,7 @@ from source_amazon_seller_partner.auth import AWSSignature
 REPORTS_API_VERSION = "2020-09-04"
 ORDERS_API_VERSION = "v0"
 VENDORS_API_VERSION = "v1"
+FINANCES_API_VERSION = "v0"
 
 DATE_TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
@@ -742,3 +743,91 @@ class VendorDirectFulfillmentShipping(AmazonSPStream):
 
     def parse_response(self, response: requests.Response, stream_state: Mapping[str, Any], **kwargs) -> Iterable[Mapping]:
         yield from response.json().get(self.data_field, {}).get("shippingLabels", [])
+
+
+class ListFinancialEventGroups(IncrementalAmazonSPStream):
+    """
+    API docs: https://github.com/amzn/selling-partner-api-docs/blob/main/references/finances-api/financesV0.md#listfinancialeventgroups
+    API model: https://github.com/amzn/selling-partner-api-models/blob/main/models/finances-api-model/financesV0.json
+    """
+
+    name = "ListFinancialEventGroups"
+    primary_key = "FinancialEventGroupId"
+    cursor_field = []
+    replication_start_date_field = "FinancialEventGroupStartedAfter"
+    replication_end_date_field = "FinancialEventGroupStartedBefore"
+    next_page_token_field = "NextToken"
+    page_size_field = "MaxResultsPerPage"
+    default_backoff_time = 60
+
+    def path(self, **kwargs) -> str:
+        return f"finances/{FINANCES_API_VERSION}/financialEventGroups"
+
+    def next_page_token(self, response: requests.Response) -> Optional[Mapping[str, Any]]:
+        stream_data = response.json()
+        next_page_token = stream_data.get("payload").get(self.next_page_token_field)
+        if next_page_token:
+            return {self.next_page_token_field: next_page_token}
+
+    def request_params(
+        self, stream_state: Mapping[str, Any], next_page_token: Mapping[str, Any] = None, **kwargs
+    ) -> MutableMapping[str, Any]:
+        params = super().request_params(stream_state=stream_state, next_page_token=next_page_token, **kwargs)
+        if not next_page_token:
+            if not self._replication_end_date:
+                params.update(
+                    {self.replication_end_date_field: pendulum.now("utc").subtract(minutes=2, seconds=10).strftime(DATE_TIME_FORMAT)}
+                )
+
+        return params
+
+    def parse_response(self, response: requests.Response, stream_state: Mapping[str, Any], **kwargs) -> Iterable[Mapping]:
+        yield from response.json().get(self.data_field, {}).get("FinancialEventGroupList", {})
+
+    def backoff_time(self, response: requests.Response) -> Optional[float]:
+        rate_limit = response.headers.get("x-amzn-RateLimit-Limit", 0)
+        if rate_limit:
+            return 1 / float(rate_limit)
+        else:
+            return self.default_backoff_time
+
+
+class ListFinancialEvents(IncrementalAmazonSPStream):
+    """
+    API docs: https://github.com/amzn/selling-partner-api-docs/blob/main/references/finances-api/financesV0.md#listfinancialevents
+    API model: https://github.com/amzn/selling-partner-api-models/blob/main/models/finances-api-model/financesV0.json
+    """
+
+    name = "ListFinancialEvents"
+    primary_key = None
+    cursor_field = []
+    replication_start_date_field = "PostedAfter"
+    replication_end_date_field = "PostedBefore"
+    next_page_token_field = "NextToken"
+    page_size_field = "MaxResultsPerPage"
+    default_backoff_time = 60
+
+    def path(self, **kwargs) -> str:
+        return f"finances/{FINANCES_API_VERSION}/financialEvents"
+
+    def request_params(
+        self, stream_state: Mapping[str, Any], next_page_token: Mapping[str, Any] = None, **kwargs
+    ) -> MutableMapping[str, Any]:
+        params = super().request_params(stream_state=stream_state, next_page_token=next_page_token, **kwargs)
+        if not next_page_token:
+            if not self._replication_end_date:
+                params.update(
+                    {self.replication_end_date_field: pendulum.now("utc").subtract(minutes=2, seconds=10).strftime(DATE_TIME_FORMAT)}
+                )
+
+        return params
+
+    def parse_response(self, response: requests.Response, stream_state: Mapping[str, Any], **kwargs) -> Iterable[Mapping]:
+        yield from [response.json().get(self.data_field, {}).get("FinancialEvents", {})]
+
+    def backoff_time(self, response: requests.Response) -> Optional[float]:
+        rate_limit = response.headers.get("x-amzn-RateLimit-Limit", 0)
+        if rate_limit:
+            return 1 / float(rate_limit)
+        else:
+            return self.default_backoff_time
