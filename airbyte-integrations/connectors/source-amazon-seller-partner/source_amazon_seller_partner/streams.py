@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2021 Airbyte, Inc., all rights reserved.
+# Copyright (c) 2022 Airbyte, Inc., all rights reserved.
 #
 
 import base64
@@ -718,9 +718,6 @@ class VendorDirectFulfillmentShipping(AmazonSPStream):
     page_size_field = "limit"
     time_format = "%Y-%m-%dT%H:%M:%SZ"
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     def path(self, **kwargs) -> str:
         return f"vendor/directFulfillment/shipping/{VENDORS_API_VERSION}/shippingLabels"
 
@@ -739,6 +736,7 @@ class VendorDirectFulfillmentShipping(AmazonSPStream):
 
             params.update({self.replication_start_date_field: start_date,
                            self.replication_end_date_field: end_date})
+
         return params
 
     def parse_response(self, response: requests.Response, stream_state: Mapping[str, Any], **kwargs) -> Iterable[Mapping]:
