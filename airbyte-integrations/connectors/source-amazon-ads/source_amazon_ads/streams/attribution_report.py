@@ -2,12 +2,15 @@
 # Copyright (c) 2022 Airbyte, Inc., all rights reserved.
 #
 
-from typing import Any, Iterable, Mapping, MutableMapping, Optional
+from typing import Any, Iterable, Mapping, MutableMapping, Optional, Dict
+from abc import abstractmethod
 
 import pendulum
 import requests
 from source_amazon_ads.schemas import AttributionReportModel, Profile
 from source_amazon_ads.streams.common import AmazonAdsStream
+
+BRAND_REFERRAL_BONUS = "brb_bonus_amount"
 
 METRICS_MAP = {
     "PERFORMANCE": [
@@ -54,7 +57,10 @@ class AttributionReport(AmazonAdsStream):
     primary_key = None
     data_field = "reports"
     page_size = 300
+
     report_type = ""
+    metrics = ""
+    group_by = ""
 
     _next_page_token_field = "cursorId"
     _current_profile_id = ""
@@ -70,8 +76,6 @@ class AttributionReport(AmazonAdsStream):
 
         self._req_start_date = ""
         self._req_end_date = ""
-
-        self.report_type = config.get("attribution_report_type", "PERFORMANCE")
 
         super().__init__(config, *args, **kwargs)
 
@@ -121,13 +125,52 @@ class AttributionReport(AmazonAdsStream):
         body = {
             "reportType": self.report_type,
             "count": self.page_size,
-            "metrics": ",".join(METRICS_MAP[self.report_type]),
+            "metrics": self.metrics,
             "startDate": self._req_start_date,
             "endDate": self._req_end_date,
-            "cursorId": "",
+            self._next_page_token_field: "",
         }
 
+        if self.group_by:
+            body["groupBy"] = self.group_by
+
         if next_page_token:
-            body["cursorId"] = next_page_token[self._next_page_token_field]
+            body[self._next_page_token_field] = next_page_token[self._next_page_token_field]
 
         return body
+
+
+class AttributionReportProducts(AttributionReport):
+    report_type = "PRODUCTS"
+
+    metrics = ",".join(METRICS_MAP[report_type])
+
+    group_by = ""
+
+
+class AttributionReportPerformanceCreative(AttributionReport):
+    report_type = "PERFORMANCE"
+
+    metrics = ",".join(METRICS_MAP[report_type])
+
+    group_by = "CREATIVE"
+
+
+class AttributionReportPerformanceAdgroup(AttributionReport):
+    report_type = "PERFORMANCE"
+
+    metrics_list = METRICS_MAP[report_type]
+    metrics_list.append(BRAND_REFERRAL_BONUS)
+    metrics = ",".join(metrics_list)
+
+    group_by = "ADGROUP"
+
+
+class AttributionReportPerformanceCampaign(AttributionReport):
+    report_type = "PERFORMANCE"
+
+    metrics_list = METRICS_MAP[report_type]
+    metrics_list.append(BRAND_REFERRAL_BONUS)
+    metrics = ",".join(metrics_list)
+
+    group_by = "CAMPAIGN"
