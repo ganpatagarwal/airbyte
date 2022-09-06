@@ -3,8 +3,6 @@
 #
 
 import json
-from http import HTTPStatus
-from urllib.parse import parse_qs, urlparse
 
 import pytest
 import requests
@@ -53,7 +51,9 @@ def get_stream_by_name(streams, stream_name):
     ("stream_name", "report_type"),
     [
         ("attribution_report_products", "PRODUCTS"),
-        ("attribution_report_performance_creative", "PERFORMANCE"),
+        ("attribution_report_performance_adgroup", "PERFORMANCE_ADGROUP"),
+        ("attribution_report_performance_campaign", "PERFORMANCE_CAMPAIGN"),
+        ("attribution_report_performance_creative", "PERFORMANCE_CREATIVE"),
     ],
 )
 @responses.activate
@@ -82,7 +82,9 @@ def test_attribution_report_schema(config, profiles_response, attribution_report
     ("stream_name", "report_type"),
     [
         ("attribution_report_products", "PRODUCTS"),
-        ("attribution_report_performance_creative", "PERFORMANCE"),
+        ("attribution_report_performance_adgroup", "PERFORMANCE_ADGROUP"),
+        ("attribution_report_performance_campaign", "PERFORMANCE_CAMPAIGN"),
+        ("attribution_report_performance_creative", "PERFORMANCE_CREATIVE"),
     ],
 )
 @responses.activate

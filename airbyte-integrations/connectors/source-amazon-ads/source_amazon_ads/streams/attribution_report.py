@@ -2,8 +2,7 @@
 # Copyright (c) 2022 Airbyte, Inc., all rights reserved.
 #
 
-from typing import Any, Iterable, Mapping, MutableMapping, Optional, Dict
-from abc import abstractmethod
+from typing import Any, Iterable, Mapping, MutableMapping, Optional
 
 import pendulum
 import requests

@@ -2,10 +2,10 @@
 # Copyright (c) 2021 Airbyte, Inc., all rights reserved.
 #
 from .attribution_report import (
-    AttributionReportProducts,
-    AttributionReportPerformanceCampaign,
     AttributionReportPerformanceAdgroup,
-    AttributionReportPerformanceCreative
+    AttributionReportPerformanceCampaign,
+    AttributionReportPerformanceCreative,
+    AttributionReportProducts,
 )
 from .profiles import Profiles
 from .report_streams import (
