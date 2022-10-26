@@ -115,3 +115,57 @@ class SponsoredBrandsReportStream(ReportStream):
             "reportDate": report_date,
         }
         return {**body, "metrics": ",".join(metrics_list)}
+
+
+class SponsoredBrandsReportStreamCampaigns(ReportStream):
+    """
+    https://advertising.amazon.com/API/docs/en-us/reference/sponsored-brands/2/reports
+    """
+
+    def report_init_endpoint(self, record_type: str) -> str:
+        return f"/v2/hsa/{record_type}/report"
+
+    metrics_map = {"campaigns": METRICS_MAP["campaigns"]}
+
+    def _get_init_report_body(self, report_date: str, record_type: str, profile):
+        metrics_list = self.metrics_map[record_type]
+        body = {
+            "reportDate": report_date,
+        }
+        return {**body, "metrics": ",".join(metrics_list)}
+
+
+class SponsoredBrandsReportStreamKeywords(ReportStream):
+    """
+    https://advertising.amazon.com/API/docs/en-us/reference/sponsored-brands/2/reports
+    """
+
+    def report_init_endpoint(self, record_type: str) -> str:
+        return f"/v2/hsa/{record_type}/report"
+
+    metrics_map = {"keywords": METRICS_MAP["keywords"]}
+
+    def _get_init_report_body(self, report_date: str, record_type: str, profile):
+        metrics_list = self.metrics_map[record_type]
+        body = {
+            "reportDate": report_date,
+        }
+        return {**body, "metrics": ",".join(metrics_list)}
+
+
+class SponsoredBrandsReportStreamAdGroups(ReportStream):
+    """
+    https://advertising.amazon.com/API/docs/en-us/reference/sponsored-brands/2/reports
+    """
+
+    def report_init_endpoint(self, record_type: str) -> str:
+        return f"/v2/hsa/{record_type}/report"
+
+    metrics_map = {"adGroups": METRICS_MAP["adGroups"]}
+
+    def _get_init_report_body(self, report_date: str, record_type: str, profile):
+        metrics_list = self.metrics_map[record_type]
+        body = {
+            "reportDate": report_date,
+        }
+        return {**body, "metrics": ",".join(metrics_list)}
