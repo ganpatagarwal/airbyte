@@ -12,7 +12,7 @@
           ["recordId"]
         ]
       },
-      "sync_mode": "incremental",
+      "sync_mode": "full_refresh",
       "destination_sync_mode": "overwrite"
     }
   ]
