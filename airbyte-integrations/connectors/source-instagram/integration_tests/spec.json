@@ -18,7 +18,15 @@
         "description": "The value of the access token generated with <b>instagram_basic, instagram_manage_insights, pages_show_list, pages_read_engagement, Instagram Public Content Access</b> permissions. See the <a href=\"https://docs.airbyte.com/integrations/sources/instagram/#step-1-set-up-instagram\">docs</a> for more information",
         "airbyte_secret": true,
         "type": "string"
-      }
+      },
+      "ig_user_ids": {
+         "title": "Instagram Business Account ID(s)",
+         "type": "string",
+         "description": "Comma separated list of Instagram Business Account IDs. Each account ID must be specified as a 17-digit number without dashes. See the <a href=\"https://developers.facebook.com/docs/instagram-api/reference/ig-user\">instagram documentation</a> for more information",
+         "pattern": "^[0-9]{17}(,[0-9]{17})*$",
+         "examples": ["6783948572,5839201945"],
+         "order": 1
+       }
     },
     "required": ["start_date", "access_token"]
   },
